@@ -9,7 +9,14 @@ class MoviesController < ApplicationController
   def index
     @sort_by_movie = params[:sort_by_movie].present? ? eval(params[:sort_by_movie]) : false
     @sort_by_date = params[:sort_by_date].present? ? eval(params[:sort_by_date]) : false
-    @movies = @sort_by_movie == true ? Movie.order('title').all : (@sort_by_date == true ? Movie.order('release_date').all : Movie.all )
+    @movies = Movie.select_movies(@sort_by_movie, @sort_by_date, session[:previous_rating_params])
+    @all_ratings = Movie.all_ratings
+    @checked_ratings = session[:previous_rating_params].nil? ? Movie.all_ratings : session[:previous_rating_params].keys
+    if params[:ratings].present?
+      session[:previous_rating_params] = params[:ratings]
+      @movies = Movie.where(rating: params[:ratings].keys)
+      @checked_ratings = params[:ratings].keys
+    end
   end
 
   def new

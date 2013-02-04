@@ -12,4 +12,8 @@ module MoviesHelper
     sort_val == true ? "hilite" : ""
   end
   
+  def check_the_box(checked_ratings, rating)
+    checked_ratings.include?(rating) ? true : false
+  end
+  
 end
