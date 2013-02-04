@@ -3,4 +3,13 @@ module MoviesHelper
   def oddness(count)
     count.odd? ?  "odd" :  "even"
   end
+  
+  def get_sort_bool(sort_val)
+    sort_val == false ? true : false
+  end
+  
+  def get_css_class(sort_val)
+    sort_val == true ? "hilite" : ""
+  end
+  
 end

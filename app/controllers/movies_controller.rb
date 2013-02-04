@@ -7,7 +7,9 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @sort_by_movie = params[:sort_by_movie].present? ? eval(params[:sort_by_movie]) : false
+    @sort_by_date = params[:sort_by_date].present? ? eval(params[:sort_by_date]) : false
+    @movies = @sort_by_movie == true ? Movie.order('title').all : (@sort_by_date == true ? Movie.order('release_date').all : Movie.all )
   end
 
   def new
