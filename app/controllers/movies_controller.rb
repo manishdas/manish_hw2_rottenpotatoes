@@ -7,16 +7,16 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sort_by_movie = params[:sort_by_movie].present? ? eval(params[:sort_by_movie]) : false
-    @sort_by_date = params[:sort_by_date].present? ? eval(params[:sort_by_date]) : false
+    session[:sorted_by] = params[:sort_by_date] == 'true' ? 'DATE' : nil if params[:sort_by_date].present?
+    session[:sorted_by] = params[:sort_by_movie] == 'true' ? 'MOVIE' : nil if params[:sort_by_movie].present?
+    session[:previous_rating_params] = params[:ratings] if params[:ratings].present?
+        
+    @sort_by_movie = params[:sort_by_movie].present? ? eval(params[:sort_by_movie]) : ((!session[:sorted_by].nil? && session[:sorted_by] == 'MOVIE') ? true : false)
+    @sort_by_date = params[:sort_by_date].present? ? eval(params[:sort_by_date]) : ((!session[:sorted_by].nil? && session[:sorted_by] == 'DATE') ? true : false)
+        
     @movies = Movie.select_movies(@sort_by_movie, @sort_by_date, session[:previous_rating_params])
     @all_ratings = Movie.all_ratings
     @checked_ratings = session[:previous_rating_params].nil? ? Movie.all_ratings : session[:previous_rating_params].keys
-    if params[:ratings].present?
-      session[:previous_rating_params] = params[:ratings]
-      @movies = Movie.where(rating: params[:ratings].keys)
-      @checked_ratings = params[:ratings].keys
-    end
   end
 
   def new
