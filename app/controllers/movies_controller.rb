@@ -1,4 +1,5 @@
 class MoviesController < ApplicationController
+  helper_method :ratings_filter, :sort_column
 
   def show
     id = params[:id] # retrieve movie ID from URI route
@@ -7,16 +8,21 @@ class MoviesController < ApplicationController
   end
 
   def index
-    session[:sorted_by] = params[:sort_by_date] == 'true' ? 'DATE' : nil if params[:sort_by_date].present?
-    session[:sorted_by] = params[:sort_by_movie] == 'true' ? 'MOVIE' : nil if params[:sort_by_movie].present?
-    session[:previous_rating_params] = params[:ratings] if params[:ratings].present?
-        
-    @sort_by_movie = params[:sort_by_movie].present? ? eval(params[:sort_by_movie]) : ((!session[:sorted_by].nil? && session[:sorted_by] == 'MOVIE') ? true : false)
-    @sort_by_date = params[:sort_by_date].present? ? eval(params[:sort_by_date]) : ((!session[:sorted_by].nil? && session[:sorted_by] == 'DATE') ? true : false)
-        
-    @movies = Movie.select_movies(@sort_by_movie, @sort_by_date, session[:previous_rating_params])
-    @all_ratings = Movie.all_ratings
-    @checked_ratings = session[:previous_rating_params].nil? ? Movie.all_ratings : session[:previous_rating_params].keys
+    redirect = false
+    
+    redirect = true if params[:ratings] != ratings_filter
+    redirect = true if params[:sort] != sort_column
+
+    session[:ratings] = ratings_filter if session[:ratings] != ratings_filter
+    session[:sort] = sort_column if session[:sort] != sort_column
+    
+    if redirect
+      flash.keep
+      redirect_to movies_path(:sort => session[:sort], :ratings => session[:ratings])
+    else
+      @all_ratings = Movie.ratings
+      @movies = Movie.find_by_ratings_and_order params[:ratings].keys, sort_column
+    end
   end
 
   def new
@@ -47,4 +53,19 @@ class MoviesController < ApplicationController
     redirect_to movies_path
   end
 
+  private
+
+  def ratings_filter
+    if params[:ratings]
+      params[:ratings]
+    elsif !session[:ratings]
+      Hash[Movie.ratings.map { |x| [x, 1] }]
+    else
+      session[:ratings]
+    end
+  end
+
+  def sort_column
+    Movie.column_names.include?(params[:sort]) ? params[:sort] : session[:sort]
+  end
 end

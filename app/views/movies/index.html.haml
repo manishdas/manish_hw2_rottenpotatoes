@@ -1,4 +1,4 @@
--#  This file is app/views/movies/index.html.haml
+-# This file is app/views/movies/index.html.haml
 %h1 All Movies
 
 = render 'filter_by_rating_form'
@@ -6,14 +6,14 @@
 %table#movies
   %thead
     %tr
-      %th{:class => get_css_class(@sort_by_movie)}= link_to "Movie Title", movies_path(sort_by_movie: get_sort_bool(@sort_by_movie)), id: 'title_header'
-      %th Rating
-      %th{:class => get_css_class(@sort_by_date)}= link_to "Release Date", movies_path(sort_by_date: get_sort_bool(@sort_by_date)), id: 'release_date_header'
+      = th_sortable "title", "Movie Title", opts = { :id => 'title_header' }
+      = th_sortable "rating"
+      = th_sortable "release_date", "Release Date", opts = { :id => 'release_date_header' }
       %th More Info
   %tbody
     - @movies.each do |movie|
       %tr
-        %td= movie.title 
+        %td= movie.title
         %td= movie.rating
         %td= movie.release_date
         %td= link_to "More about #{movie.title}", movie_path(movie)
